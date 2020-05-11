@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:youtubelikeapp/model/user.dart';
+import 'package:youtubelikeapp/services/database.dart';
 
 
 class AuthServices {
@@ -37,7 +38,7 @@ class AuthServices {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
-
+      await DatabaseService(uid: user.uid).updateUserData('initial name','please input your profile');
       return _userFromFirebaseUser(user);
     } catch(e) {
       print(e.toString);
@@ -49,7 +50,7 @@ class AuthServices {
     try {
       AuthResult result = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
-
+      
       return _userFromFirebaseUser(user);
     } catch(e) {
       print(e.toString());

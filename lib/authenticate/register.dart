@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youtubelikeapp/services/auth.dart';
-import 'package:youtubelikeapp/services/constans.dart';
+import 'package:youtubelikeapp/shared/constans.dart';
 import 'package:youtubelikeapp/shared/loading.dart';
 
 

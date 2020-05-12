@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:youtubelikeapp/authenticate/authenticate.dart';
-import 'package:youtubelikeapp/home/mainhome.dart';
+import 'package:youtubelikeapp/views/home/mainhome.dart';
 import 'package:youtubelikeapp/model/user.dart';
 
 class Wrapper extends StatelessWidget {

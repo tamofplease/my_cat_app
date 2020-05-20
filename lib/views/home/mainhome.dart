@@ -36,6 +36,9 @@ class _MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
 
+    User user = Provider.of<User>(context);
+    
+
     void _getEditForm()  {
       showDialog<void>(context: context, builder: (context) {
         return AlertDialog(
@@ -48,116 +51,129 @@ class _MainState extends State<Main> {
       });
     }
 
-    return StreamProvider<List<User_data>>.value(
-      value: DatabaseService().userDatawith,
-      child: loading ? Loading : Scaffold (
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Container(
-            width: 300,
-            height: 500,
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 20,
-                  height: 20,
-                  child: Image.asset("images/Youtube.png"),
+    return StreamBuilder<UserData>(
+      stream: DatabaseService(uid: user.uid).userData,
+      builder: (context, snapshot) {
+        if(snapshot.hasData) {
+          UserData userData = snapshot.data;
+          print(userData.name);
+          print(userData.profileMessage);
+          print(userData.imageUrl);
+          return Scaffold (  
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              title: Container(
+                width: 300,
+                height: 500,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      width: 20,
+                      height: 20,
+                      child: Image.asset("images/Youtube.png"),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Text(
+                        "マロン",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.black,
+                        )
+                      ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: Text(
-                    "マロン",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
+              ),
+              centerTitle: false,
+              actions: <Widget> [
+                IconButton(
+                  icon: Icon(
+                      Icons.brightness_5,
                       color: Colors.black,
-                    )
                   ),
+                  onPressed: (){
+                    _getEditForm();
+                  },
                 ),
-              ],
-            ),
-          ),
-          centerTitle: false,
-          actions: <Widget> [
-            IconButton(
-              icon: Icon(
-                  Icons.brightness_5,
-                  color: Colors.black,
-              ),
-              onPressed: (){
-                _getEditForm();
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                  Icons.video_call,
-                  color: Colors.black,
-              ),
-              onPressed: (){},
-            ),
-            IconButton(
-              icon: Icon(
-                  Icons.search,
-                color: Colors.black,
-              ),
-              onPressed: (){},
-            ),
-            Container(
-              margin: const EdgeInsets.all(10),
-              child: GestureDetector(
-                onTap:  ()  async {
-                  loading = true;
-                  await _auth.signOut();
-                  loading = false;
-                },
-                child: CircleAvatar(
-                  backgroundImage: AssetImage("images/flutter.png"),
+                IconButton(
+                  icon: Icon(
+                      Icons.video_call,
+                      color: Colors.black,
+                  ),
+                  onPressed: (){},
                 ),
-              )
-            )
-          ]
-        ),
-        
-        body: ListView.builder(
-          itemCount: array.length,
-          itemBuilder: (context,int index){
-            return Home(index: index);
-          }
-        ),
+                IconButton(
+                  icon: Icon(
+                      Icons.search,
+                    color: Colors.black,
+                  ),
+                  onPressed: (){},
+                ),
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  child: GestureDetector(
+                    onTap:  ()  async {
+                      loading = true;
+                      await _auth.signOut();
+                      loading = false;
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: NetworkImage(
+                        userData.imageUrl
+                      ),
+                    ),
+                  )
+                )
+              ]
+            ),
+            
+            body: ListView.builder(
+              itemCount: array.length,
+              itemBuilder: (context,int index){
+                return Home(index: index);
+              }
+            ),
 
-        bottomNavigationBar: BottomNavigationBar(
-          onTap: setindex,
-          currentIndex: selectedIndex,
-          type: BottomNavigationBarType.fixed,
-          fixedColor: Colors.red,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
-              ),
-              title: Text("Home"),
+            bottomNavigationBar: BottomNavigationBar(
+              onTap: setindex,
+              currentIndex: selectedIndex,
+              type: BottomNavigationBarType.fixed,
+              fixedColor: Colors.red,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.home,
+                  ),
+                  title: Text("Home"),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.favorite),
+                  title: Text("like"),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.trending_up),
+                  title: Text("Trending"),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.subscriptions),
+                  title: Text("Trending"),
+                ),
+              ]
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
-              title: Text("like"),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.trending_up),
-              title: Text("Trending"),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.subscriptions),
-              title: Text("Trending"),
-            ),
-          ]
-        ),
 
-        floatingActionButton: FloatingActionButton(
-          onPressed: (){print("pressed!");},
-          child: Icon(Icons.add),
-          backgroundColor: Colors.grey,
-        ),
-      ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: (){print("pressed!");},
+              child: Icon(Icons.add),
+              backgroundColor: Colors.grey,
+            ),
+          );
+        }else {
+          return Loading();
+        }
+      }
     );  
   }
 }

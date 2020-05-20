@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:youtubelikeapp/model/user.dart';
 import 'package:youtubelikeapp/services/database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 
 class AuthServices {
@@ -36,9 +37,12 @@ class AuthServices {
 
   Future registerWithEmailAndPassword(String email, String password) async {
     try {
+
       AuthResult result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
-      await DatabaseService(uid: user.uid).updateUserData('initial name','please input your profile');
+      String defaultUrl = await FirebaseStorage.instance.ref().child("default.png").getDownloadURL();
+      await DatabaseService(uid: user.uid).updateUserData('initial name','please input your profile',defaultUrl.toString());
+      
       return _userFromFirebaseUser(user);
     } catch(e) {
       print(e.toString);

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:youtubelikeapp/model/post.dart';
 import 'package:youtubelikeapp/model/user.dart';
 
 
@@ -8,11 +9,13 @@ class DatabaseService {
   DatabaseService({ this.uid });
 
   final CollectionReference usersCollection = Firestore.instance.collection("users");
+  final CollectionReference postsCollection = Firestore.instance.collection("posts");
 
-  Future updateUserData(String name, String profileMessage) async {
+  Future updateUserData(String name, String profileMessage, String imageUrl) async {
     return await usersCollection.document(uid).setData ({
         'name': name,
-        'profile_message': profileMessage,
+        'profileMessage': profileMessage,
+        'imageUrl': imageUrl,
       });
   }
 
@@ -20,12 +23,13 @@ class DatabaseService {
     return snapshot.documents.map((doc) {
       return User_data(
         name: doc.data['name'] ?? '',
-        profile_message: doc.data['profile_message'] ?? '',
+        profileMessage: doc.data['profileMessage'] ?? '',
+        imageUrl: doc.data['imageUrl']
       );
     }).toList();
   }
 
-  Stream<List<User_data>> get userDatawith {
+  Stream<List<User_data>> get allUserData {
     return usersCollection.snapshots().map(_userListFromSnapshot);
   }
 
@@ -33,7 +37,8 @@ class DatabaseService {
     return UserData(
       uid: uid,
       name: snapshot.data["name"],
-      profile_message: snapshot.data["profile_message"],
+      profileMessage: snapshot.data["profileMessage"],
+      imageUrl: snapshot.data["imageUrl"],
     );
   }
 
@@ -41,6 +46,26 @@ class DatabaseService {
     return usersCollection.document(uid).snapshots().map(_userDataFromSnapshot);
   }
 
+  Future updatePostData(String title, int good) async {
+    return await postsCollection.document(uid).setData({
+      'title': title,
+      'timestamp': DateTime.now(),
+      'good': good,
+    });
+  }
 
+  List<Post> _allPostsFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.documents.map((doc) {
+      return Post(
+        title: doc.data['title'],
+        good: doc.data['good'],
+        timestamp: doc.data['timestamp'],
+      );
+    }).toList();
+  }
+
+  Stream<List<Post>> get allposts {
+    return postsCollection.snapshots().map(_allPostsFromSnapshot);
+  }
 
 }

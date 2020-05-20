@@ -1,9 +1,12 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:youtubelikeapp/model/user.dart';
 import 'package:youtubelikeapp/services/database.dart';
 import 'package:youtubelikeapp/shared/constans.dart';
 import 'package:youtubelikeapp/shared/loading.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:async';
 
 
 class SettingForm extends StatefulWidget {
@@ -14,9 +17,18 @@ class SettingForm extends StatefulWidget {
 class _SettingFormState extends State<SettingForm> {
 
   final _formKey = GlobalKey<FormState>();
+
   
   String _currentName;
   String _currentprofile;
+  var _currentUserImage;
+
+  Future _getImage() async {
+      var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
+      setState(() {
+        _currentUserImage = tempImage;
+      });
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -28,55 +40,77 @@ class _SettingFormState extends State<SettingForm> {
       builder: (context, snapshot) {
         if(snapshot.hasData) {
           UserData userData = snapshot.data;
-          return Form(
-            key: _formKey,
-            child: Column(
-              children: <Widget>[
-                Text('Update your profile'),
-                SizedBox(height: 20),
-                Expanded(
-                  flex: 2,
-                  child: TextFormField(
-                  initialValue: userData.name,
-                  decoration: textInputDecoration,
-                  validator: (val) => val.isEmpty ? 'please enter a name' : null,
-                  onChanged: (val) => setState(() => _currentName = val),
+          return Container(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      // CircleAvatar(backgroundColor: ,)
+                      Text('Update your profile'),
+                    ],
                   ),
-                ),
-                Expanded(flex: 1,child: SizedBox(height: 30)),
-                Expanded(
-                  flex: 2,
-                  child: TextFormField(
-                    initialValue: userData.profile_message,
+                  SizedBox(height: 20),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                    initialValue: userData.name,
                     decoration: textInputDecoration,
-                    onChanged: (val) => setState(() => _currentprofile = val),
-                  ),
-                ),
-                Expanded(flex: 1, child: SizedBox(height:20)),
-                Expanded(
-                  flex: 2,
-                  child: RaisedButton(
-                    color: Colors.black,
-                    child: Text(
-                      'update',
-                      style: TextStyle(color: Colors.white),
+                    validator: (val) => val.isEmpty ? 'please enter a name' : null,
+                    onChanged: (val) => setState(() => _currentName = val),
                     ),
-                    onPressed: () async {
-                      if(_formKey.currentState.validate()) {
-                        await DatabaseService(uid: user.uid).updateUserData(
-                          _currentName ?? userData.name,
-                          _currentprofile ?? userData.profile_message,
-                        );
-                        Navigator.pop(context);
-                      }
-                    }
                   ),
-                ),
-                
-              ],
+                  Expanded(flex: 1,child: SizedBox(height: 30)),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      initialValue: userData.profileMessage,
+                      decoration: textInputDecoration,
+                      onChanged: (val) => setState(() => _currentprofile = val),
+                    ),
+                  ),
+
+                  Expanded(flex: 1, child: SizedBox(height:20)),
+                  Expanded(
+                    flex: 2,
+                    child: FlatButton(
+                      child: Text("Select Image"),
+                      onPressed: () => _getImage(),
+                    ),
+                  ),
+                  Expanded(flex: 1, child: SizedBox(height:20)),
+                  Expanded(
+                    flex: 2,
+                    child: RaisedButton(
+                      color: Colors.black,
+                      child: Text(
+                        'update',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onPressed: () async {
+                        final StorageReference firebasestorageRef = FirebaseStorage.instance.ref().child('${userData.uid}').child("profile.jpg");
+                        final StorageUploadTask task = firebasestorageRef.putFile(_currentUserImage);
+                        print("≠≠≠≠≠≠≠≠≠≠≠≠$task ~~~~~~~~~~~~~~~");
+                        if(_formKey.currentState.validate()) {
+                          await DatabaseService(uid: user.uid).updateUserData(
+                            _currentName ?? userData.name,
+                            _currentprofile ?? userData.profileMessage,
+                            _currentUserImage ?? userData.imageUrl,
+                          );
+                          Navigator.pop(context);
+                        }
+                      }
+                    ),
+                  ), 
+                ],
+              ),
             ),
           );
+        }else {
+          return CircularProgressIndicator();
         }
+        
       }
     );
   }

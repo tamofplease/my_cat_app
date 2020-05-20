@@ -27,6 +27,15 @@ dependencies:
   firebase_auth: ^0.14.0+5
   cloud_firestore: ^0.12.9+4
   provider: ^4.0.5+1
+  image_picker: ^0.6.6+4
+  firebase_core:
+  firebase_analytics:
+  firebase_storage:
+    git:
+      url: git://github.com/danysz/flutterfire.git
+      ref: master
+      path: packages/firebase_storage
+
 
 dev_dependencies:
   flutter_test:

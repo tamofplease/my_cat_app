@@ -6,6 +6,7 @@ import 'package:youtubelikeapp/shared/constans.dart';
 import 'package:youtubelikeapp/shared/loading.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:youtubelikeapp/services/image.dart';
 import 'dart:async';
 
 
@@ -55,10 +56,10 @@ class _SettingFormState extends State<SettingForm> {
                   Expanded(
                     flex: 2,
                     child: TextFormField(
-                    initialValue: userData.name,
-                    decoration: textInputDecoration,
-                    validator: (val) => val.isEmpty ? 'please enter a name' : null,
-                    onChanged: (val) => setState(() => _currentName = val),
+                      initialValue: userData.name,
+                      decoration: textInputDecoration,
+                      validator: (val) => val.isEmpty ? 'please enter a name' : null,
+                      onChanged: (val) => setState(() => _currentName = val),
                     ),
                   ),
                   Expanded(flex: 1,child: SizedBox(height: 30)),
@@ -91,8 +92,9 @@ class _SettingFormState extends State<SettingForm> {
                       onPressed: () async {
                         final StorageReference firebasestorageRef = FirebaseStorage.instance.ref().child('${userData.uid}').child("profile.jpg");
                         final StorageUploadTask task = firebasestorageRef.putFile(_currentUserImage);
-                        print("≠≠≠≠≠≠≠≠≠≠≠≠$task ~~~~~~~~~~~~~~~");
+                        _currentUserImage = await FirebaseStorageService.loadFromStorage(context, "${userData.uid}/profile.jpg");
                         if(_formKey.currentState.validate()) {
+                          print("≠≠≠≠≠≠≠≠≠≠≠≠${task} ~~~~~~~~~~~~~~~");
                           await DatabaseService(uid: user.uid).updateUserData(
                             _currentName ?? userData.name,
                             _currentprofile ?? userData.profileMessage,

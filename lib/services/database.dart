@@ -12,7 +12,6 @@ class DatabaseService {
   final CollectionReference postsCollection = Firestore.instance.collection("posts");
 
   Future updateUserData(String name, String profileMessage, String imageUrl) async {
-    print("%%%%%%%%%%%%%%%%%%%update%%%%%%%%%%%%%%%%%%%%%%%");
     return await usersCollection.document(uid).setData ({
         'name': name,
         'profileMessage': profileMessage,

@@ -92,7 +92,6 @@ class _RegisterState extends State<Register> {
                         color: Colors.grey,
                         child: Text("register"),
                         onPressed: () async {
-                          print(_formKey.currentState.validate());
                           if(_formKey.currentState.validate()) {
                             Navigator.of(context).pop();
                             setState(() => loading = true);

@@ -56,7 +56,6 @@ class _MainState extends State<Main> {
     }
 
     Widget _buildFutureBuilder(UserData user) {
-      print("&&&&&&&&&&&&&&&&${user.imageUrl}");
       return FutureBuilder(
         future: loadFromStorage(context, user.imageUrl ),
         builder: (context, snapshot) {
@@ -68,7 +67,6 @@ class _MainState extends State<Main> {
           }
           return CircularProgressIndicator();
         }
-        
       );
     }
 
@@ -78,7 +76,6 @@ class _MainState extends State<Main> {
         
         if(snapshot.hasData) {
           UserData userData = snapshot.data;
-          print(userData.imageUrl);
         
           return Scaffold (  
             appBar: AppBar(
@@ -117,13 +114,6 @@ class _MainState extends State<Main> {
                   onPressed: (){
                     _getEditForm();
                   },
-                ),
-                IconButton(
-                  icon: Icon(
-                      Icons.video_call,
-                      color: Colors.black,
-                  ),
-                  onPressed: (){},
                 ),
                 IconButton(
                   icon: Icon(

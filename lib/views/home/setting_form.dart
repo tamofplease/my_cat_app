@@ -4,9 +4,9 @@ import 'package:youtubelikeapp/model/user.dart';
 import 'package:youtubelikeapp/services/database.dart';
 import 'package:youtubelikeapp/services/image.dart';
 import 'package:youtubelikeapp/shared/constans.dart';
-import 'package:youtubelikeapp/shared/loading.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+
 import 'dart:async';
 
 
@@ -22,14 +22,30 @@ class _SettingFormState extends State<SettingForm> {
   
   String _currentName;
   String _currentprofile;
-  var _currentUserImage;
+  var _currentUserImage ;
 
   Future _getImage() async {
       var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
       setState(() {
         _currentUserImage = tempImage;
       });
-    }
+  }
+
+  Widget _buildFuture(UserData user) {
+    return FutureBuilder(
+      future: FirebaseStorageService.loadFromStorage(context, user.imageUrl),
+      builder: (context, snapshot) {
+        if(snapshot.hasData) {
+          return CircleAvatar(
+            radius: 30,
+            backgroundImage: NetworkImage(snapshot.data),
+          );
+        }
+        return CircularProgressIndicator();
+      }
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,20 +62,19 @@ class _SettingFormState extends State<SettingForm> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      // CircleAvatar(backgroundColor: ,)
-                      Text('Update your profile'),
-                    ],
+                 
+                  GestureDetector(
+                    child: _buildFuture(userData),
+                    onTap: () => _getImage(),
                   ),
                   SizedBox(height: 20),
                   Expanded(
                     flex: 2,
                     child: TextFormField(
-                    initialValue: userData.name,
-                    decoration: textInputDecoration,
-                    validator: (val) => val.isEmpty ? 'please enter a name' : null,
-                    onChanged: (val) => setState(() => _currentName = val),
+                      initialValue: userData.name,
+                      decoration: textInputDecoration,
+                      validator: (val) => val.isEmpty ? 'please enter a name' : null,
+                      onChanged: (val) => setState(() => _currentName = val),
                     ),
                   ),
                   Expanded(flex: 1,child: SizedBox(height: 30)),
@@ -68,16 +83,8 @@ class _SettingFormState extends State<SettingForm> {
                     child: TextFormField(
                       initialValue: userData.profileMessage,
                       decoration: textInputDecoration,
+                      // decoration: textInputDecoration.copyWith(fillColor: Colors.black),
                       onChanged: (val) => setState(() => _currentprofile = val),
-                    ),
-                  ),
-
-                  Expanded(flex: 1, child: SizedBox(height:20)),
-                  Expanded(
-                    flex: 2,
-                    child: FlatButton(
-                      child: Text("Select Image"),
-                      onPressed: () => _getImage(),
                     ),
                   ),
                   Expanded(flex: 1, child: SizedBox(height:20)),
@@ -91,16 +98,17 @@ class _SettingFormState extends State<SettingForm> {
                       ),
                       onPressed: () async {
                         final StorageReference firebasestorageRef = FirebaseStorage.instance.ref().child('${userData.uid}').child("profile.jpg");
-                        final StorageUploadTask task = firebasestorageRef.putFile(_currentUserImage);
+                        if(_currentUserImage != null) {
+                          final StorageUploadTask task = firebasestorageRef.putFile(_currentUserImage);
+                        }
                         
                         if(_formKey.currentState.validate()) {
                           await DatabaseService(uid: user.uid).updateUserData(
                             _currentName ?? userData.name,
                             _currentprofile ?? userData.profileMessage,
-                            "${userData.uid}/profile.jpg",
+                            userData.imageUrl == "default.png"  && _currentUserImage == null ?  "default.png" : "${userData.uid}/profile.jpg" ,
                           );
                           Navigator.pop(context);
-                          print("≠≠≠≠≠≠≠≠≠≠≠≠${userData.imageUrl} ~~~~~~~~~~~~~~~");
                         }
                       }
                     ),

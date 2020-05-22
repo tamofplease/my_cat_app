@@ -89,7 +89,6 @@ class _SignInState extends State<SignIn> {
                         color: Colors.grey,
                         child: Text("SignIn"),
                         onPressed: () async {
-                          print(_formKey.currentState.validate());
                           if(_formKey.currentState.validate()) {
                             setState(() => loading = true);
                             Navigator.of(context).pop();

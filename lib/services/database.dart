@@ -11,12 +11,19 @@ class DatabaseService {
   final CollectionReference usersCollection = Firestore.instance.collection("users");
   final CollectionReference postsCollection = Firestore.instance.collection("posts");
 
-  Future updateUserData(String name, String profileMessage, String imageUrl) async {
+  Future updateUserData(String name, String profileMessage, String imageUrl, bool loading) async {
     return await usersCollection.document(uid).setData ({
         'name': name,
         'profileMessage': profileMessage,
         'imageUrl': imageUrl,
+        'loading': loading,
       });
+  }
+
+  Future changeState() async {
+    return await usersCollection.document(uid).setData ({
+
+    });
   }
 
   List<User_data> _userListFromSnapshot(QuerySnapshot snapshot) {
@@ -24,10 +31,13 @@ class DatabaseService {
       return User_data(
         name: doc.data['name'] ?? '',
         profileMessage: doc.data['profileMessage'] ?? '',
-        imageUrl: doc.data['imageUrl']
+        imageUrl: doc.data['imageUrl'],
+        loading: doc.data['loading'],
       );
     }).toList();
   }
+
+
 
   Stream<List<User_data>> get allUserData {
     return usersCollection.snapshots().map(_userListFromSnapshot);
@@ -39,6 +49,7 @@ class DatabaseService {
       name: snapshot.data["name"],
       profileMessage: snapshot.data["profileMessage"],
       imageUrl: snapshot.data["imageUrl"],
+      loading: snapshot.data["loading"],
     );
   }
 

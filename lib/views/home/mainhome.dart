@@ -5,6 +5,7 @@ import 'package:youtubelikeapp/services/database.dart';
 import 'package:youtubelikeapp/views/home/setting_form.dart';
 import 'package:youtubelikeapp/views/home/home.dart';
 import 'package:youtubelikeapp/model/user.dart';
+import 'package:youtubelikeapp/services/image.dart';
 import 'package:youtubelikeapp/services/auth.dart';
 import 'package:youtubelikeapp/shared/loading.dart';
 
@@ -34,9 +35,6 @@ class _MainState extends State<Main> {
     });
   }
 
-  Future<dynamic> loadFromStorage(BuildContext context, String image) async {
-    return await FirebaseStorage.instance.ref().child(image).getDownloadURL();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +54,11 @@ class _MainState extends State<Main> {
     }
 
     Widget _buildFutureBuilder(UserData user) {
+      print("~~~~~~~~~~~~~~~~~${user.imageUrl}, ${user.loading}");
       return FutureBuilder(
-        future: loadFromStorage(context, user.imageUrl ),
+        future: FirebaseStorageService.loadFromStorage(context, user.imageUrl),
         builder: (context, snapshot) {
-          if(snapshot.hasData) {
+          if(snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
             return CircleAvatar(
               radius: 20,
               backgroundImage: NetworkImage(snapshot.data),
@@ -74,9 +73,9 @@ class _MainState extends State<Main> {
       stream: DatabaseService(uid: user.uid).userData,
       builder: (context, snapshot) {
         
-        if(snapshot.hasData) {
+        if(snapshot.hasData && !snapshot.data.loading) {
           UserData userData = snapshot.data;
-        
+          print(userData.imageUrl);
           return Scaffold (  
             appBar: AppBar(
               backgroundColor: Colors.white,

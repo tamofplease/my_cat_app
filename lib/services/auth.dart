@@ -41,7 +41,7 @@ class AuthServices {
       AuthResult result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
       String defaultUrl = await FirebaseStorage.instance.ref().child("default.png").getDownloadURL();
-      await DatabaseService(uid: user.uid).updateUserData('initial name','your profile',defaultUrl);
+      await DatabaseService(uid: user.uid).updateUserData('initial name','your profile',"default.png", false);
       
       return _userFromFirebaseUser(user);
     } catch(e) {

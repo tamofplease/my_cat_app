@@ -46,6 +46,15 @@ class _SettingFormState extends State<SettingForm> {
     );
   }
 
+  Widget _pickerWidget(UserData user) {
+    if(_currentUserImage != null) {
+      return CircleAvatar(
+        radius: 30,
+        backgroundImage: new FileImage(_currentUserImage));
+    }else {
+      return _buildFuture(user);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +73,8 @@ class _SettingFormState extends State<SettingForm> {
                 children: <Widget>[
                  
                   GestureDetector(
-                    child: _buildFuture(userData),
+                    child: _pickerWidget(userData),
+                    // child: _buildFuture(userData),
                     onTap: () => _getImage(),
                   ),
                   SizedBox(height: 20),
@@ -97,16 +107,23 @@ class _SettingFormState extends State<SettingForm> {
                         style: TextStyle(color: Colors.white),
                       ),
                       onPressed: () async {
+                        await DatabaseService(uid: user.uid).updateUserData(
+                            userData.name,
+                            userData.profileMessage,
+                            userData.imageUrl == "default.png"  && _currentUserImage == null ?  "default.png" : "${userData.uid}/profile.jpg",
+                            true,
+                          );
                         final StorageReference firebasestorageRef = FirebaseStorage.instance.ref().child('${userData.uid}').child("profile.jpg");
                         if(_currentUserImage != null) {
                           final StorageUploadTask task = firebasestorageRef.putFile(_currentUserImage);
+                          StorageTaskSnapshot storageTaskSnapshot = await task.onComplete;
                         }
-                        
                         if(_formKey.currentState.validate()) {
                           await DatabaseService(uid: user.uid).updateUserData(
                             _currentName ?? userData.name,
                             _currentprofile ?? userData.profileMessage,
-                            userData.imageUrl == "default.png"  && _currentUserImage == null ?  "default.png" : "${userData.uid}/profile.jpg" ,
+                            userData.imageUrl == "default.png"  && _currentUserImage == null ?  "default.png" : "${userData.uid}/profile.jpg",
+                            false,
                           );
                           Navigator.pop(context);
                         }

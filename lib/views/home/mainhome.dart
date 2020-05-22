@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:youtubelikeapp/services/database.dart';
@@ -33,11 +34,14 @@ class _MainState extends State<Main> {
     });
   }
 
+  Future<dynamic> loadFromStorage(BuildContext context, String image) async {
+    return await FirebaseStorage.instance.ref().child(image).getDownloadURL();
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    User user = Provider.of<User>(context);
-    
+    User user = Provider.of<User>(context);    
 
     void _getEditForm()  {
       showDialog<void>(context: context, builder: (context) {
@@ -51,14 +55,31 @@ class _MainState extends State<Main> {
       });
     }
 
+    Widget _buildFutureBuilder(UserData user) {
+      print("&&&&&&&&&&&&&&&&${user.imageUrl}");
+      return FutureBuilder(
+        future: loadFromStorage(context, user.imageUrl ),
+        builder: (context, snapshot) {
+          if(snapshot.hasData) {
+            return CircleAvatar(
+              radius: 20,
+              backgroundImage: NetworkImage(snapshot.data),
+            );
+          }
+          return CircularProgressIndicator();
+        }
+        
+      );
+    }
+
     return StreamBuilder<UserData>(
       stream: DatabaseService(uid: user.uid).userData,
       builder: (context, snapshot) {
+        
         if(snapshot.hasData) {
           UserData userData = snapshot.data;
-          print(userData.name);
-          print(userData.profileMessage);
           print(userData.imageUrl);
+        
           return Scaffold (  
             appBar: AppBar(
               backgroundColor: Colors.white,
@@ -119,12 +140,7 @@ class _MainState extends State<Main> {
                       await _auth.signOut();
                       loading = false;
                     },
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(
-                        userData.imageUrl
-                      ),
-                    ),
+                    child: _buildFutureBuilder(userData),
                   )
                 )
               ]

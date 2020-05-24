@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:youtubelikeapp/views/post/post_form.dart';
 
 class NewPost extends StatefulWidget {
   @override
@@ -9,6 +10,7 @@ class _NewPostState extends State<NewPost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.grey,
         centerTitle: true,
@@ -37,6 +39,7 @@ class _NewPostState extends State<NewPost> {
           ),
         ),
       ),
+      body: PostForm(),
       
 
     );

@@ -55,7 +55,6 @@ class _MainState extends State<Main> {
     }
 
     Widget _buildFutureBuilder(UserData user) {
-      print("~~~~~~~~~~~~~~~~~${user.imageUrl}, ${user.loading}");
       return FutureBuilder(
         future: FirebaseStorageService.loadFromStorage(context, user.imageUrl),
         builder: (context, snapshot) {
@@ -76,7 +75,6 @@ class _MainState extends State<Main> {
         
         if(snapshot.hasData && !snapshot.data.loading) {
           UserData userData = snapshot.data;
-          print(userData.imageUrl);
           return Scaffold (  
             appBar: AppBar(
               backgroundColor: Colors.white,

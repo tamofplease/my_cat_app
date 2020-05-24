@@ -1,6 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:youtubelikeapp/views/post/new.dart';
 import 'package:youtubelikeapp/services/database.dart';
 import 'package:youtubelikeapp/views/home/setting_form.dart';
 import 'package:youtubelikeapp/views/home/home.dart';
@@ -170,7 +171,14 @@ class _MainState extends State<Main> {
             ),
 
             floatingActionButton: FloatingActionButton(
-              onPressed: (){print("pressed!");},
+              onPressed: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NewPost(),
+                  )
+                );
+              },
               child: Icon(Icons.add),
               backgroundColor: Colors.grey,
             ),

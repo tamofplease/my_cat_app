@@ -57,11 +57,11 @@ class DatabaseService {
     return usersCollection.document(uid).snapshots().map(_userDataFromSnapshot);
   }
 
-  Future updatePostData(String title, int good) async {
+  Future updatePostData(String title, String image) async {
     return await postsCollection.document(uid).setData({
       'title': title,
       'timestamp': DateTime.now(),
-      'good': good,
+      'image': image,
     });
   }
 
@@ -69,7 +69,7 @@ class DatabaseService {
     return snapshot.documents.map((doc) {
       return Post(
         title: doc.data['title'],
-        good: doc.data['good'],
+        image: doc.data['inmage'],
         timestamp: doc.data['timestamp'],
       );
     }).toList();

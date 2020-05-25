@@ -1,5 +1,12 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:youtubelikeapp/shared/constans.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:async';
+import 'package:provider/provider.dart';
+import 'package:youtubelikeapp/model/post.dart';
+import 'package:youtubelikeapp/model/user.dart';
+import 'package:youtubelikeapp/services/database.dart';
 
 class PostForm extends StatefulWidget {
   @override
@@ -10,9 +17,31 @@ class _PostFormState extends State<PostForm> {
 
   final _formKey = GlobalKey<FormState>();
   String _title = "";
-  var _postImage = "";
+  var _postImage;
 
-  Widget Box() {
+  Future _getImage() async {
+    var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _postImage = tempImage;
+    });
+  }
+
+  Widget imageBox() {
+    return Container(
+      padding: EdgeInsets.all(50),
+      margin: EdgeInsets.all(20),
+      width: 150,
+      height: 150,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: new FileImage(_postImage),
+        )
+      )
+    );
+  }
+
+  Widget box() {
     return Container(
       padding: EdgeInsets.all(50),
       margin: EdgeInsets.all(20),
@@ -24,6 +53,9 @@ class _PostFormState extends State<PostForm> {
           Icons.add,
           size: 100,
         ),
+        onTap: () {
+          _getImage();
+        }, 
       ),
     );
   }
@@ -41,23 +73,39 @@ class _PostFormState extends State<PostForm> {
 
   @override
   Widget build(BuildContext context) {
+
+    final user = Provider.of<User>(context);
+
     return SingleChildScrollView(
       reverse: true,
       child: Form(
         key: _formKey,
         child: Column(
           children: <Widget>[
-            _postImage.isEmpty? Box() : Box(),
+            _postImage != null ? imageBox() : box(),
             Container(
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
               child: TitleStyle(),
             ),
             RaisedButton(
               color: Colors.grey,
-              child: Text('Post!', style: TextStyle(color: Colors.white)),
-              onPressed: (){
-                print("save!");
-                Navigator.pop(context);
+              child: Text('Post', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                String path = '${user.uid}/posts/$_title';
+
+                final StorageReference  firebasesotrageRef = FirebaseStorage.instance.ref().child(path);
+                if(_postImage != null) {
+                  final StorageUploadTask task = firebasesotrageRef.putFile(_postImage);
+                  StorageTaskSnapshot storageTaskSnapshot = await task.onComplete;
+                }
+
+                if(_formKey.currentState.validate()){
+                  await DatabaseService(uid: user.uid).updatePostData(
+                    _title,
+                    path,
+                  );
+                  Navigator.pop(context);
+                }                
               }
             ),
           ],

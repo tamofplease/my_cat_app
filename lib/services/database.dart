@@ -58,7 +58,7 @@ class DatabaseService {
   }
 
   Future updatePostData(String title, String image) async {
-    return await postsCollection.document(uid).setData({
+    return await postsCollection.document("post/$uid/$title").setData({
       'title': title,
       'timestamp': DateTime.now(),
       'image': image,

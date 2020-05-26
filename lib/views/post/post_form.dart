@@ -19,6 +19,8 @@ class _PostFormState extends State<PostForm> {
   String _title = "";
   var _postImage;
 
+  bool _disable = false;
+
   Future _getImage() async {
     var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
@@ -71,6 +73,12 @@ class _PostFormState extends State<PostForm> {
     );
   }
 
+  void toggleButtonState() {
+    setState(() {
+      _disable = !_disable;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -89,8 +97,9 @@ class _PostFormState extends State<PostForm> {
             ),
             RaisedButton(
               color: Colors.grey,
-              child: Text('Post', style: TextStyle(color: Colors.white)),
-              onPressed: () async {
+              child: _disable? Text('posting...', style: TextStyle(color: Colors.white)) : Text('Post', style: TextStyle(color: Colors.white)),
+              onPressed: _disable ? null : () async {
+                toggleButtonState();
                 String path = '${user.uid}/posts/$_title';
 
                 final StorageReference  firebasesotrageRef = FirebaseStorage.instance.ref().child(path);
@@ -104,9 +113,10 @@ class _PostFormState extends State<PostForm> {
                     _title,
                     path,
                   );
+                  toggleButtonState();
                   Navigator.pop(context);
                 }                
-              }
+              },
             ),
           ],
         )

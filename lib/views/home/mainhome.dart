@@ -1,6 +1,8 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:youtubelikeapp/views/post/postlist.dart';
 import 'package:youtubelikeapp/views/post/new.dart';
 import 'package:youtubelikeapp/services/database.dart';
 import 'package:youtubelikeapp/views/home/setting_form.dart';
@@ -9,6 +11,7 @@ import 'package:youtubelikeapp/model/user.dart';
 import 'package:youtubelikeapp/services/image.dart';
 import 'package:youtubelikeapp/services/auth.dart';
 import 'package:youtubelikeapp/shared/loading.dart';
+import 'package:youtubelikeapp/model/post.dart';
 
 class Main extends StatefulWidget {
   _MainState createState() => _MainState();
@@ -72,7 +75,6 @@ class _MainState extends State<Main> {
     return StreamBuilder<UserData>(
       stream: DatabaseService(uid: user.uid).userData,
       builder: (context, snapshot) {
-        
         if(snapshot.hasData && !snapshot.data.loading) {
           UserData userData = snapshot.data;
           return Scaffold (  
@@ -134,11 +136,11 @@ class _MainState extends State<Main> {
               ]
             ),
             
-            body: ListView.builder(
-              itemCount: array.length,
-              itemBuilder: (context,int index){
-                return Home(index: index);
-              }
+            body: StreamProvider<List<Post>>.value (
+              value: DatabaseService(uid: user.uid).allposts,
+              child: Container(
+                child: postList(),
+              ),
             ),
 
             bottomNavigationBar: BottomNavigationBar(

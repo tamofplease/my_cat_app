@@ -57,25 +57,33 @@ class DatabaseService {
     return usersCollection.document(uid).snapshots().map(_userDataFromSnapshot);
   }
 
-  Future updatePostData(String title, String image) async {
-    return await postsCollection.document("post/$uid/$title").setData({
+  Future updatePostData(String title, String image, int like) async {
+    return await postsCollection.document("$title").setData({
       'title': title,
       'timestamp': DateTime.now(),
       'image': image,
+      'like': like,
+    });
+  }
+
+  Future updateLikeNumber(String title, int like) async {
+    return await postsCollection.document("$title").setData({
+      'like': like,
     });
   }
 
   List<Post> _allPostsFromSnapshot(QuerySnapshot snapshot) {
     return snapshot.documents.map((doc) {
       return Post(
-        title: doc.data['title'],
-        image: doc.data['inmage'],
-        timestamp: doc.data['timestamp'],
+        title: doc.data['title'] ?? "",
+        image: doc.data['image'] ?? "",
+        timestamp: doc.data['timestamp'] ?? "",
+        like: doc.data['like'] ?? 0,
       );
     }).toList();
   }
 
-  Stream<List<Post>> get allposts {
+  Stream<List<Post>> get allposts {  
     return postsCollection.snapshots().map(_allPostsFromSnapshot);
   }
 

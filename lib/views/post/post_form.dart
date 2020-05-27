@@ -112,6 +112,7 @@ class _PostFormState extends State<PostForm> {
                   await DatabaseService(uid: user.uid).updatePostData(
                     _title,
                     path,
+                    0,
                   );
                   toggleButtonState();
                   Navigator.pop(context);

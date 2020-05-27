@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Post {
   final String title;
-  final int timestamp;
+  final Timestamp timestamp;
   final String image;
-  Post({ this.title, this.timestamp, this.image });
+  final int like;
+  Post({ this.title, this.timestamp, this.image , this.like });
 }

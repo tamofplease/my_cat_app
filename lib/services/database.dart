@@ -66,25 +66,41 @@ class DatabaseService {
     });
   }
 
-  Future updateLikeNumber(String title, int like) async {
-    return await postsCollection.document("$title").setData({
-      'like': like,
+  Future updateLikeNumber(Post post) async {
+    await postsCollection.document("${post.title}").setData({
+      'title': post.title,
+      'timestamp': post.timestamp,
+      'image': post.image,
+      'like': post.like + 1,
     });
   }
 
   List<Post> _allPostsFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.documents.map((doc) {
-      return Post(
-        title: doc.data['title'] ?? "",
-        image: doc.data['image'] ?? "",
-        timestamp: doc.data['timestamp'] ?? "",
-        like: doc.data['like'] ?? 0,
-      );
-    }).toList();
+    
+    try{
+      return snapshot.documents.map((doc) {
+        return Post(
+          title: doc.data['title'] ?? " ",
+          image: doc.data['image'] ?? " ",
+          timestamp: doc.data['timestamp'] ?? DateTime.now(),
+          like: doc.data['like'] ?? 0,
+        );
+      }).toList();
+    } catch(e) {
+      print(e.toString());
+      return null;
+    }
+    
   }
 
   Stream<List<Post>> get allposts {  
-    return postsCollection.snapshots().map(_allPostsFromSnapshot);
+    try {
+      return postsCollection.snapshots().map(_allPostsFromSnapshot);
+    }catch(e) {
+      print(e.toString());
+      return null;
+    }
+    
   }
 
 }

@@ -15,11 +15,14 @@ class postTile extends StatelessWidget {
   postTile({ this.post });
 
   Future<List<dynamic>> pickImage (context, image, uid) async{
-    
     List<dynamic> list = [];
     list.add(await FirebaseStorageService.loadFromStorage(context, "$uid/profile.jpg"));
     list.add(await FirebaseStorageService.loadFromStorage(context, image));
     return list;
+  }
+
+  Future<void> changeFavorite(uid, post) async {
+    await DatabaseService(uid: uid).updateLikeNumber(post);
   }
 
 
@@ -38,8 +41,11 @@ class postTile extends StatelessWidget {
               if(userdata.hasData) {
                 return Column (
                   children: <Widget>[
-                    Container(
+                    GestureDetector(
                       child: Image.network(snapshot.data[1]),
+                      onDoubleTap: () {
+                        changeFavorite(user.uid, post);
+                      }
                     ),
                     SizedBox(height: 5),
                     ListTile(
@@ -52,16 +58,26 @@ class postTile extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text("${userdata.data.name}"),
-                      trailing: Text("${post.like}"),
+                      trailing: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Row(
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(Icons.favorite),
+                              onPressed: () => changeFavorite(user.uid, post),
+                              ),
+                            Text("${post.like}"),
+                          ],
+                          )
+                      )
                     ),
                     SizedBox(
                       height: 20,
-                    )
-                
+                    ),
                   ],
                 );
               }else {
-                return Loading();
+                return Container();
               }
               
             }

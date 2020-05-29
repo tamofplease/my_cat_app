@@ -12,6 +12,7 @@ import 'package:youtubelikeapp/services/image.dart';
 import 'package:youtubelikeapp/services/auth.dart';
 import 'package:youtubelikeapp/shared/loading.dart';
 import 'package:youtubelikeapp/model/post.dart';
+import 'package:youtubelikeapp/views/yourpost/youtpost.dart';
 
 class Main extends StatefulWidget {
   _MainState createState() => _MainState();
@@ -139,7 +140,8 @@ class _MainState extends State<Main> {
             body: StreamProvider<List<Post>>.value (
               value: DatabaseService(uid: user.uid).allposts,
               child: Container(
-                child: postList(),
+                // child: postList(),
+                child: selectedIndex == 3 ?  yourPost() : postList(),
               ),
             ),
 
@@ -165,7 +167,7 @@ class _MainState extends State<Main> {
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.subscriptions),
-                  title: Text("Trending"),
+                  title: Text("YourPosts"),
                 ),
               ]
             ),

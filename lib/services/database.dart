@@ -3,6 +3,7 @@ import 'package:youtubelikeapp/model/post.dart';
 import 'package:youtubelikeapp/model/user.dart';
 
 
+
 class DatabaseService {
 
   final String uid;
@@ -36,6 +37,7 @@ class DatabaseService {
       );
     }).toList();
   }
+  
 
 
 
@@ -58,13 +60,20 @@ class DatabaseService {
   }
 
   Future updatePostData(String title, String image, int like) async {
-    return await postsCollection.document("$title").setData({
+    await postsCollection.document("$title").setData({
+      'title': title,
+      'timestamp': DateTime.now(),
+      'image': image,
+      'like': like,
+    });
+    await usersCollection.document("$uid/posts/$title").setData({
       'title': title,
       'timestamp': DateTime.now(),
       'image': image,
       'like': like,
     });
   }
+
 
   Future updateLikeNumber(Post post) async {
     await postsCollection.document("${post.title}").setData({
@@ -73,6 +82,39 @@ class DatabaseService {
       'image': post.image,
       'like': post.like + 1,
     });
+    await postsCollection.document("$uid/posts/${post.title}").setData({
+      'title': post.title,
+      'timestamp': post.timestamp,
+      'image': post.image,
+      'like': post.like + 1,
+    });
+  }
+
+  List<Post> _userPostsFromSnapshot(QuerySnapshot snapshot) {
+    try {
+      return snapshot.documents.map((doc) {
+        return Post(
+          title: doc.data['title'] ?? " ",
+          image: doc.data['image'] ?? " ",
+          timestamp: doc.data['timestamp'] ?? DateTime.now(),
+          like: doc.data['like'] ?? 0,
+        );
+      }).toList();
+    }catch(e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Stream<List<Post>> get userposts {
+    try{
+      print("something");
+      final CollectionReference userpostsCollection = Firestore.instance.collection("users/${uid}/posts");
+      return userpostsCollection.snapshots().map(_userPostsFromSnapshot);
+    }catch(e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   List<Post> _allPostsFromSnapshot(QuerySnapshot snapshot) {
@@ -90,7 +132,6 @@ class DatabaseService {
       print(e.toString());
       return null;
     }
-    
   }
 
   Stream<List<Post>> get allposts {  

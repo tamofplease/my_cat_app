@@ -101,11 +101,15 @@ class _PostFormState extends State<PostForm> {
               onPressed: _disable ? null : () async {
                 toggleButtonState();
                 String path = '${user.uid}/posts/$_title';
+                
 
                 final StorageReference  firebasesotrageRef = FirebaseStorage.instance.ref().child(path);
+                final StorageReference firebasestorageRef = FirebaseStorage.instance.ref().child(_title);
                 if(_postImage != null) {
                   final StorageUploadTask task = firebasesotrageRef.putFile(_postImage);
+                  final StorageUploadTask task2 = firebasestorageRef.putFile(_postImage);
                   StorageTaskSnapshot storageTaskSnapshot = await task.onComplete;
+
                 }
 
                 if(_formKey.currentState.validate()){
@@ -113,6 +117,7 @@ class _PostFormState extends State<PostForm> {
                     _title,
                     path,
                     0,
+                    user.uid,
                   );
                   toggleButtonState();
                   Navigator.pop(context);

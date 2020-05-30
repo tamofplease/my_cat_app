@@ -5,5 +5,6 @@ class Post {
   var timestamp;
   final String image;
   final int like;
-  Post({ this.title, this.timestamp, this.image , this.like });
+  final String uid;
+  Post({ this.title, this.timestamp, this.image , this.like , this.uid});
 }

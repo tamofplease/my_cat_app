@@ -13,10 +13,10 @@ class yourPostTile extends StatelessWidget {
 
   yourPostTile({this.post});
 
-  Future<List<dynamic>> pickImage(context ,image, uid) async {
-    print("users/$image===============");
+  Future<List<dynamic>> pickImage(context ,String image,String imageUrl) async {
     List<dynamic> list = [];
-    list.add(await FirebaseStorageService.loadFromStorage(context, "$uid/profile.jpg"));
+    print(imageUrl);
+    list.add(await FirebaseStorageService.loadFromStorage(context, "$imageUrl"));
     list.add(await FirebaseStorageService.loadFromStorage(context, "$image"));
     return list;
   }
@@ -30,14 +30,15 @@ class yourPostTile extends StatelessWidget {
 
     final user = Provider.of<User>(context);
 
-    return FutureBuilder(
-      future: pickImage(context, post.image, user.uid),
-      builder: (context, snapshot) {
-        if(snapshot.hasData) {
-          return StreamBuilder<UserData>(
-            stream: DatabaseService(uid: user.uid).userData,
-            builder: (context, userdata){
-              if(userdata.hasData) {
+    return StreamBuilder<UserData> (
+      stream: DatabaseService(uid: user.uid).userData,
+      builder: (context, userdata){
+        if(userdata.hasData) {
+          return FutureBuilder(
+            future: pickImage(context, post.image, "${post.uid}/profile.jpg"),
+            builder: (context, snapshot){
+              if(snapshot.hasData){
+                
                 return Column(
                   children: <Widget>[
                     GestureDetector(
@@ -73,11 +74,12 @@ class yourPostTile extends StatelessWidget {
                     SizedBox(height: 30),
                   ],
                 );
-              }else{
+              }else {
                 return Container();
               }
             }
           );
+          
         }else{
           return Container();
         }

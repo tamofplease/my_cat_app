@@ -6,7 +6,12 @@ class FirebaseStorageService extends ChangeNotifier {
   FirebaseStorageService();
 
   static Future<dynamic> loadFromStorage(BuildContext context, String image) async{
-    return await FirebaseStorage.instance.ref().child("$image").getDownloadURL();
+    try {
+      return await FirebaseStorage.instance.ref().child("$image").getDownloadURL();
+    } catch(e) {
+      return await FirebaseStorage.instance.ref().child("default.png").getDownloadURL();
+    }
+    
   }
 
   

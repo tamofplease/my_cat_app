@@ -16,6 +16,7 @@ class postTile extends StatelessWidget {
 
   Future<List<dynamic>> pickImage (context, image, uid) async{
     List<dynamic> list = [];
+    
     list.add(await FirebaseStorageService.loadFromStorage(context, "$uid/profile.jpg"));
     list.add(await FirebaseStorageService.loadFromStorage(context, image));
     return list;
@@ -30,13 +31,12 @@ class postTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
     
-    
     return FutureBuilder (
-      future: pickImage(context, post.image, user.uid),
+      future: pickImage(context, post.image, post.uid),
       builder: (context, snapshot) {
         if(snapshot.hasData) {
           return StreamBuilder<UserData>(
-            stream: DatabaseService(uid: user.uid).userData,
+            stream: DatabaseService(uid: post.uid).userData,
             builder: (context, userdata){
               if(userdata.hasData) {
                 return Column (

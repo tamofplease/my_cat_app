@@ -1,42 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:youtubelikeapp/views/yourpost/youtpost.dart';
 import 'package:youtubelikeapp/model/post.dart';
+import 'package:youtubelikeapp/services/database.dart';
+import 'package:youtubelikeapp/services/image.dart';
 import 'package:youtubelikeapp/model/user.dart';
 import 'package:provider/provider.dart';
-import 'package:youtubelikeapp/services/image.dart';
-import 'package:youtubelikeapp/services/database.dart';
-import 'package:youtubelikeapp/shared/loading.dart';
 
-
-class postTile extends StatefulWidget {
-
+class LikeTile extends StatefulWidget{
   final Post post;
-
-  postTile({ this.post });
-
-  @override 
-  postTileState createState() => postTileState();
+  LikeTile({this.post});
+  @override
+  _LikeTileState createState() => _LikeTileState();
 }
 
-class postTileState extends State<postTile> {
+class _LikeTileState extends State<LikeTile> {
 
+  
 
-  Future<List<dynamic>> pickImage (context, image, uid) async{
+  Future<List<dynamic>> pickImage(context ,String image,String imageUrl) async {
     List<dynamic> list = [];
-    
-    list.add(await FirebaseStorageService.loadFromStorage(context, "$uid/profile.jpg"));
-    list.add(await FirebaseStorageService.loadFromStorage(context, image));
+    list.add(await FirebaseStorageService.loadFromStorage(context, "$imageUrl"));
+    list.add(await FirebaseStorageService.loadFromStorage(context, "$image"));
     return list;
   }
 
 
+
   Future<void> changeFavorite(uid, post,like) async {
+    
     if(like) {
       await DatabaseService(uid: uid).decreseLikeNumber(post);
     }else {
       await DatabaseService(uid: uid).updateLikeNumber(post);
     }
   }
-
 
   void changeLike(bool like) {
     setState(() {
@@ -47,26 +44,26 @@ class postTileState extends State<postTile> {
   @override
   Widget build(BuildContext context) {
 
-  
     final post = widget.post;
     final user = Provider.of<User>(context);
-    bool like = post.favusers.contains(user.uid);
-    
-    return FutureBuilder (
-      future: pickImage(context, post.image, post.uid),
-      builder: (context, snapshot) {
-        if(snapshot.hasData) {
-          return StreamBuilder<UserData>(
-            stream: DatabaseService(uid: post.uid).userData,
-            builder: (context, userdata){
-              if(userdata.hasData) {
-                return Column (
+    bool like = true;
+
+    return StreamBuilder<UserData> (
+      stream: DatabaseService(uid: user.uid).userData,
+      builder: (context, userdata){
+        if(userdata.hasData) {
+          return FutureBuilder(
+            future: pickImage(context, post.image, "${post.uid}/profile.jpg"),
+            builder: (context, snapshot){
+              if(snapshot.hasData){
+                return Column(
                   children: <Widget>[
                     GestureDetector(
                       child: Image.network(snapshot.data[1]),
                       onDoubleTap: () {
                         changeFavorite(user.uid, post, like);
                         changeLike(like);
+                        
                       }
                     ),
                     SizedBox(height: 5),
@@ -87,21 +84,19 @@ class postTileState extends State<postTile> {
                             IconButton(
                               icon: Icon(
                                 Icons.favorite,
-                                color: like ? Colors.red : Colors.grey
+                                color: like ? Colors.red : Colors.grey,
                               ),
-                              onPressed: (){
+                              onPressed: () {
                                 changeFavorite(user.uid, post, like);
                                 changeLike(like);
-                              } 
+                              } ,
                               ),
                             Text("${post.like}"),
                           ],
                           )
-                      )
+                      ),
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
+                    SizedBox(height: 30),
                   ],
                 );
               }else {
@@ -109,9 +104,10 @@ class postTileState extends State<postTile> {
               }
             }
           );
-        }else {
-          return CircularProgressIndicator();
-        } 
+          
+        }else{
+          return Container();
+        }
       }
     );
   }

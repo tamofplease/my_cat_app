@@ -118,6 +118,7 @@ class _PostFormState extends State<PostForm> {
                     path,
                     0,
                     user.uid,
+                    [],
                   );
                   toggleButtonState();
                   Navigator.pop(context);

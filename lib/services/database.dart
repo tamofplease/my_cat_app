@@ -59,7 +59,7 @@ class DatabaseService {
     return usersCollection.document(uid).snapshots().map(_userDataFromSnapshot);
   }
 
-  Future updatePostData(String title, String image, int like, String uid) async {
+  Future updatePostData(String title, String image, int like, String uid, List<String> favusers) async {
     try{
       await postsCollection.document("$title").setData({
       'title': title,
@@ -67,6 +67,7 @@ class DatabaseService {
       'image': title,
       'like': like,
       'uid': uid,
+      'favusers':favusers,
       });
       await usersCollection.document("$uid/posts/$title").setData({
         'title': title,
@@ -74,16 +75,46 @@ class DatabaseService {
         'image': image,
         'like': like,
         'uid': uid,
+        'favusers':favusers,
       });
     } catch(e) {
       print(e.toString());
       return null;
     }
-    
+  }
+
+  Future decreseLikeNumber(Post post) async {
+    try{
+      var tempOutput = new List<String>.from(post.favusers);
+      tempOutput.remove(uid);
+      await postsCollection.document("${post.title}").setData({
+      'title': post.title,
+      'timestamp': post.timestamp,
+      'image': post.image,
+      'like': post.like - 1,
+      'uid' : post.uid,
+      'favusers':tempOutput,
+      });
+      await usersCollection.document("$uid/posts/${post.title}").setData({
+        'title': post.title,
+        'timestamp': post.timestamp,
+        'image': post.image,
+        'like': post.like - 1,
+        'uid' : post.uid,
+        'favusers':tempOutput,
+      });
+      await usersCollection.document("$uid/likes/${post.title}").delete();
+    }catch(e) {
+      print(e.toString());
+      return null;
+    }
   }
 
 
   Future updateLikeNumber(Post post) async {
+    var tempOutput = new List<String>.from(post.favusers);
+    tempOutput.add(uid);
+    print(tempOutput);
     try{
       await postsCollection.document("${post.title}").setData({
       'title': post.title,
@@ -91,19 +122,56 @@ class DatabaseService {
       'image': post.image,
       'like': post.like + 1,
       'uid' : post.uid,
+      'favusers': tempOutput,
       });
-      await postsCollection.document("$uid/posts/${post.title}").setData({
+      await usersCollection.document("$uid/posts/${post.title}").setData({
         'title': post.title,
         'timestamp': post.timestamp,
         'image': post.image,
         'like': post.like + 1,
         'uid' : post.uid,
+        'favusers': tempOutput,
+      });
+      
+      await usersCollection.document("$uid/likes/${post.title}").setData({
+        'title': post.title,
+        'timestamp': post.timestamp,
+        'image': post.image,
+        'like': post.like + 1,
+        'uid' : post.uid,
+        'favusers': tempOutput,
       });
     }catch(e) {
       print(e.toString());
       return null;
     }
-    
+  }
+
+  List<Post> _likePostsFromSnapshot(QuerySnapshot snapshot) {
+    try {
+      return snapshot.documents.map((doc) {
+        return Post(
+          title: doc.data['title'] ?? "",
+          image: doc.data['image'] ?? " ",
+          timestamp: doc.data['timestamp'] ?? DateTime.now(),
+          like: doc.data['like'] ?? 0,
+          uid: doc.data['uid'] ?? "",
+          favusers: doc.data['vusers'] ?? [] ,
+        );
+      }).toList();
+    }catch(e) {
+      print(e.toString());
+    }
+  }
+
+  Stream<List<Post>> get likeposts {
+    try {
+      final CollectionReference likepostsCollection = Firestore.instance.collection("users/$uid/likes");
+      return likepostsCollection.snapshots().map(_likePostsFromSnapshot);
+    }catch(e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   List<Post> _userPostsFromSnapshot(QuerySnapshot snapshot) {
@@ -115,6 +183,7 @@ class DatabaseService {
           timestamp: doc.data['timestamp'] ?? DateTime.now(),
           like: doc.data['like'] ?? 0,
           uid: doc.data['uid'] ?? "",
+          favusers: doc.data['favusers'] ?? [] ,
         );
       }).toList();
     }catch(e) {
@@ -143,6 +212,7 @@ class DatabaseService {
           timestamp: doc.data['timestamp'] ?? DateTime.now(),
           like: doc.data['like'] ?? 0,
           uid: doc.data["uid"] ?? "",
+          favusers: doc.data['favusers'] ?? [] ,
         );
       }).toList();
     } catch(e) {

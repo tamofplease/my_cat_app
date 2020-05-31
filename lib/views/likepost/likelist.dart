@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:youtubelikeapp/model/post.dart';
 import 'package:provider/provider.dart';
-import 'package:youtubelikeapp/views/post/posttile.dart';
+import 'package:youtubelikeapp/views/likepost/liketile.dart';
 
-class postList extends StatefulWidget {
+class likeList extends StatefulWidget {
   @override
-  _postListState createState() => _postListState();
+  _likeListState createState() => _likeListState();
 }
 
-class _postListState extends State<postList> {
+class _likeListState extends State<likeList> {
   @override
   Widget build(BuildContext context) {
     final posts = Provider.of<List<Post>>(context) ?? [];
@@ -16,7 +16,7 @@ class _postListState extends State<postList> {
     return ListView.builder(
       itemCount: posts.length,
       itemBuilder: (context, index) {
-        return postTile(post: posts[index]);
+        return LikeTile(post: posts[index]);
       }
     );
   }

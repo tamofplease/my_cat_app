@@ -6,5 +6,6 @@ class Post {
   final String image;
   final int like;
   final String uid;
-  Post({ this.title, this.timestamp, this.image , this.like , this.uid});
+  final List<dynamic> favusers;
+  Post({ this.title, this.timestamp, this.image , this.like , this.uid, this.favusers});
 }

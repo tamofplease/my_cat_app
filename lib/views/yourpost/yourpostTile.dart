@@ -5,30 +5,52 @@ import 'package:youtubelikeapp/services/database.dart';
 import 'package:youtubelikeapp/services/image.dart';
 import 'package:youtubelikeapp/model/user.dart';
 import 'package:provider/provider.dart';
-import '';
 
-class yourPostTile extends StatelessWidget {
-
+class yourPostTile extends StatefulWidget{
   final Post post;
-
   yourPostTile({this.post});
+  @override
+  _yourPostTileState createState() => _yourPostTileState();
+}
+
+class _yourPostTileState extends State<yourPostTile> {
+
+  
 
   Future<List<dynamic>> pickImage(context ,String image,String imageUrl) async {
     List<dynamic> list = [];
-    print(imageUrl);
     list.add(await FirebaseStorageService.loadFromStorage(context, "$imageUrl"));
     list.add(await FirebaseStorageService.loadFromStorage(context, "$image"));
     return list;
   }
 
-  Future<void> changeFavorite(uid, post) async {
-    await DatabaseService(uid: uid).updateLikeNumber(post);
+
+
+  Future<void> changeFavorite(uid, post,like) async {
+    
+    if(like) {
+      await DatabaseService(uid: uid).decreseLikeNumber(post);
+    }else {
+      await DatabaseService(uid: uid).updateLikeNumber(post);
+    }
+  }
+
+  void changeLike(bool like) {
+    setState(() {
+      like = !like;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
 
+    final post = widget.post;
     final user = Provider.of<User>(context);
+    bool like = post.favusers.contains(user.uid);
+    // print(like);
+    // print(post.title);
+    // print(post.favusers);
+    // print(user.uid);
 
     return StreamBuilder<UserData> (
       stream: DatabaseService(uid: user.uid).userData,
@@ -38,13 +60,14 @@ class yourPostTile extends StatelessWidget {
             future: pickImage(context, post.image, "${post.uid}/profile.jpg"),
             builder: (context, snapshot){
               if(snapshot.hasData){
-                
                 return Column(
                   children: <Widget>[
                     GestureDetector(
                       child: Image.network(snapshot.data[1]),
                       onDoubleTap: () {
-                        changeFavorite(user.uid, post);
+                        changeFavorite(user.uid, post, like);
+                        changeLike(like);
+                        
                       }
                     ),
                     SizedBox(height: 5),
@@ -63,8 +86,14 @@ class yourPostTile extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             IconButton(
-                              icon: Icon(Icons.favorite),
-                              onPressed: () => changeFavorite(user.uid, post),
+                              icon: Icon(
+                                Icons.favorite,
+                                color: like ? Colors.red : Colors.grey,
+                              ),
+                              onPressed: () {
+                                changeFavorite(user.uid, post, like);
+                                changeLike(like);
+                              } ,
                               ),
                             Text("${post.like}"),
                           ],

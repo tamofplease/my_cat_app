@@ -13,6 +13,7 @@ import 'package:youtubelikeapp/services/auth.dart';
 import 'package:youtubelikeapp/shared/loading.dart';
 import 'package:youtubelikeapp/model/post.dart';
 import 'package:youtubelikeapp/views/yourpost/youtpost.dart';
+import 'package:youtubelikeapp/views/likepost/like.dart';
 
 class Main extends StatefulWidget {
   _MainState createState() => _MainState();
@@ -140,8 +141,7 @@ class _MainState extends State<Main> {
             body: StreamProvider<List<Post>>.value (
               value: DatabaseService(uid: user.uid).allposts,
               child: Container(
-                // child: postList(),
-                child: selectedIndex == 3 ?  yourPost() : postList(),
+                child: selectedIndex == 3 ?  yourPost() : selectedIndex == 1 ? LikePost() : postList(),
               ),
             ),
 
